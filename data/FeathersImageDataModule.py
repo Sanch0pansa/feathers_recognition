@@ -1,9 +1,7 @@
 import torch
 import lightning as L
 from torch.utils.data import random_split, DataLoader
-# Note - you must have torchvision installed for this example
 from FeathersImageDataset import FeathersImageDataset
-from torch.utils.data import WeightedRandomSampler
 from torchvision.transforms import transforms
 
 
@@ -88,15 +86,14 @@ class FeathersImageDataModule(L.LightningDataModule):
     
 
 if __name__ == "__main__":
-    dm = FeathersImageDataModule("./dataset/images", "./dataset/data/feathers_data.csv")
+    dm = FeathersImageDataModule("../dataset/images", "../dataset/data/feathers_data.csv")
     dm.setup("fit")
-    
+
     dloader = dm.train_dataloader()
 
     clss = dict()
 
     for batch_index, (batch, label) in enumerate(dloader):
-        for el in label:
-            clss[int(el)] = clss.get(int(el), 0) + 1
+        print(batch_index, batch.size(), label.size())
 
     print(clss)
