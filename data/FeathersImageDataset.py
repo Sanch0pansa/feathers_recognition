@@ -24,6 +24,9 @@ class FeathersImageDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+    def num_classes(self):
+        return len(set(self.data['species']))
+
     def __getitem__(self, idx):
         filename = self.data['filename'][idx]
         filename_parts = filename.split("_")
@@ -44,7 +47,6 @@ class FeathersImageDataset(Dataset):
 
         else:
             image_tensor = torch.from_numpy(image)
-
 
         if self.target_transform:
             label = self.target_transform(label)

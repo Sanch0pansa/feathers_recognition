@@ -12,8 +12,8 @@ class FeathersImageDataModule(L.LightningDataModule):
                  test_data_dir: str | None = None,
                  test_data_file: str | None = None,
                  split_ratio: float = 0.2,
-                 img_width: int = 48,
-                 img_height: int = 240,
+                 img_width: int = 224,
+                 img_height: int = 224,
                  batch_size: int = 32):
         super().__init__()
 
@@ -45,6 +45,13 @@ class FeathersImageDataModule(L.LightningDataModule):
         self.feathers_test = None
         self.feathers_val = None
         self.feathers_predict = None
+
+    def num_classes(self) -> int:
+        feathers_full = FeathersImageDataset(self.train_data_file,
+                                             self.train_data_dir,
+                                             transform=self.train_transform)
+
+        return feathers_full.num_classes()
 
     def setup(self, stage: str):
         # Assign train/val datasets for use in dataloaders
