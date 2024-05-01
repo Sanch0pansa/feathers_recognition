@@ -1,5 +1,5 @@
-from BaseModel import BaseModel
-from models import get_resnet50
+from models.BaseModel import BaseModel
+from models.models import get_resnet50
 
 
 class Resnet50Model(BaseModel):

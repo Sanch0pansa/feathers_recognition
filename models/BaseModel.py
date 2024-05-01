@@ -16,6 +16,7 @@ class BaseModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
+
         loss = F.cross_entropy(y_hat, y)
 
         predictions = torch.argmax(y_hat, dim=1)

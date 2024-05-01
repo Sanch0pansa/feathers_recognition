@@ -1,5 +1,5 @@
-from BaseModel import BaseModel
-from models import get_dense121, get_dense161, get_dense169, get_dense201
+from models.BaseModel import BaseModel
+from models.models import get_dense121, get_dense161, get_dense169, get_dense201
 
 
 class Dense121Model(BaseModel):

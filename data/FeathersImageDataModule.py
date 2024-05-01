@@ -1,7 +1,7 @@
 import torch
 import lightning as L
 from torch.utils.data import random_split, DataLoader
-from FeathersImageDataset import FeathersImageDataset
+from data.FeathersImageDataset import FeathersImageDataset
 from torchvision.transforms import transforms
 
 

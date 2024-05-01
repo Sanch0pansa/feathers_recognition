@@ -40,7 +40,7 @@ class FeathersImageDataset(Dataset):
         if w > h:
             image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
 
-        label = torch.Tensor([self.data['species'][idx]])
+        label = self.data['species'][idx]
 
         if self.transform:
             image_tensor = self.transform(image)
@@ -51,7 +51,7 @@ class FeathersImageDataset(Dataset):
         if self.target_transform:
             label = self.target_transform(label)
 
-        return image_tensor.float(), label.float()
+        return image_tensor.float(), label
 
 
 if __name__ == "__main__":
