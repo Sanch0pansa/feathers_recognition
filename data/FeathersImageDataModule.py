@@ -5,6 +5,20 @@ from data.FeathersImageDataset import FeathersImageDataset
 from torchvision.transforms import transforms
 
 
+def make_weights_for_balanced_classes(images, nclasses):
+    count = [0] * nclasses
+    for idx, item in images.iterrows():
+        count[item['species']] += 1
+    weight_per_class = [0.] * nclasses
+    N = float(sum(count))
+    for i in range(nclasses):
+        weight_per_class[i] = N / float(count[i])
+    weight = [0] * len(images)
+    for idx, item in images.iterrows():
+        weight[idx] = weight_per_class[item['species']]
+    return weight
+
+
 class FeathersImageDataModule(L.LightningDataModule):
     def __init__(self, 
                  train_data_dir: str = "./",
@@ -14,7 +28,8 @@ class FeathersImageDataModule(L.LightningDataModule):
                  split_ratio: float = 0.2,
                  img_width: int = 224,
                  img_height: int = 224,
-                 batch_size: int = 32):
+                 batch_size: int = 32,
+                 use_sampler: bool = False,):
         super().__init__()
 
         self.batch_size = batch_size
@@ -46,27 +61,41 @@ class FeathersImageDataModule(L.LightningDataModule):
         self.feathers_val = None
         self.feathers_predict = None
 
+        self.train_sampler = None
+        self.val_sampler = None
+
+        self.use_sampler = use_sampler
+
     def num_classes(self) -> int:
         feathers_full = FeathersImageDataset(self.train_data_file,
                                              self.train_data_dir,
                                              transform=self.train_transform)
 
-        return feathers_full.num_classes()
+        return feathers_full.num_classes
 
     def setup(self, stage: str):
         # Assign train/val datasets for use in dataloaders
         if stage == "fit":
-            feathers_full = FeathersImageDataset(self.train_data_file,
-                                                 self.train_data_dir,
-                                                 transform=self.train_transform)
-            data_count = len(feathers_full)
-            validation_count = int(data_count * self.split_ratio)
+            self.feathers_train = FeathersImageDataset(self.train_data_file,
+                                                       self.train_data_dir,
+                                                       transform=self.train_transform)
 
-            self.feathers_train, self.feathers_val = random_split(
-                feathers_full, 
-                [data_count - validation_count, validation_count], 
-                generator=torch.Generator()
-            )
+
+
+            self.feathers_val = FeathersImageDataset(self.test_data_file,
+                                                     self.test_data_dir,
+                                                     transform=self.test_transform)
+
+            if self.use_sampler:
+                weights = make_weights_for_balanced_classes(self.feathers_train.imgs,
+                                                            len(self.feathers_train.classes))
+                weights = torch.DoubleTensor(weights)
+                self.train_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
+
+                weights = make_weights_for_balanced_classes(self.feathers_val.imgs,
+                                                            len(self.feathers_val.classes))
+                weights = torch.DoubleTensor(weights)
+                self.val_sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
 
         # Assign test dataset for use in dataloader(s)
         if stage == "test":
@@ -80,9 +109,13 @@ class FeathersImageDataModule(L.LightningDataModule):
                                                          transform=self.test_transform)
 
     def train_dataloader(self):
+        if self.train_sampler:
+            return DataLoader(self.feathers_train, batch_size=self.batch_size, sampler=self.train_sampler)
         return DataLoader(self.feathers_train, batch_size=self.batch_size)
 
     def val_dataloader(self):
+        if self.val_sampler:
+            return DataLoader(self.feathers_val, batch_size=self.batch_size, sampler=self.val_sampler)
         return DataLoader(self.feathers_val, batch_size=self.batch_size)
 
     def test_dataloader(self):
@@ -93,7 +126,13 @@ class FeathersImageDataModule(L.LightningDataModule):
     
 
 if __name__ == "__main__":
-    dm = FeathersImageDataModule("../dataset/images", "../dataset/data/feathers_data.csv")
+    dm = FeathersImageDataModule(
+        "../dataset/images",
+        "../dataset/data/train_all_species.csv",
+        "../dataset/images",
+        "../dataset/data/test_all_species.csv",
+
+        use_sampler=True)
     dm.setup("fit")
 
     dloader = dm.train_dataloader()

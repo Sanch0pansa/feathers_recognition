@@ -15,7 +15,13 @@ class FeathersImageDataset(Dataset):
                  target_transform=None,
                  ):
         self.data = pd.read_csv(annotations_file)
-        self.data['species'] = pd.factorize(self.data['species'])[0]
+        self.classes_codes, self.classes_uniques = pd.factorize(self.data['species'], sort=True)
+        self.data['species'] = pd.factorize(self.data['species'], sort=True)[0]
+
+        self.imgs = pd.DataFrame(columns=('filename', 'species'))
+        for idx, row in self.data.iterrows():
+            self.imgs.loc[idx] = [row['filename'], row['species']]
+
         self.img_dir = img_dir
 
         self.transform = transform
@@ -24,6 +30,7 @@ class FeathersImageDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+    @property
     def num_classes(self):
         return len(set(self.data['species']))
 
@@ -53,6 +60,17 @@ class FeathersImageDataset(Dataset):
 
         return image_tensor.float(), label
 
+    @property
+    def classes(self):
+        return list(self.classes_uniques)
+
+    @property
+    def class_to_idx(self):
+        data = dict()
+        for (i, name) in enumerate(self.classes_uniques):
+            data[name] = i
+        return data
+
 
 if __name__ == "__main__":
     
@@ -65,12 +83,10 @@ if __name__ == "__main__":
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
     
-    dataset = FeathersImageDataset("./dataset/data/feathers_data.csv",
-                                   "./dataset/images",
+    dataset = FeathersImageDataset("../dataset/data/feathers_data.csv",
+                                   "../dataset/images",
                                    transform=transform_a)
     data_loader = DataLoader(dataset, batch_size=4, shuffle=True)
     
-    c = 0
-    for imgs, labels in data_loader:
-        print(f"Batch {c} of images has shape: ",imgs.shape)
-        print(f"Batch {c} of labels has shape: ", labels.shape)
+    print(dataset.classes)
+    print(dataset.class_to_idx)

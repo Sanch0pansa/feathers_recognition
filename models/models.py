@@ -53,6 +53,24 @@ def get_dense201(weights: str | None = None, save_to: str | None = None, num_cla
 
 def get_resnet50(weights: str | None = None, save_to: str | None = None, num_classes: int = 594):
     model = models.resnet50(weights='DEFAULT')
-    return handle_densenet_model(model, weights, save_to, num_classes)
+    return handle_resnet_model(model, weights, save_to, num_classes)
 
 
+def get_resnet18(weights: str | None = None, save_to: str | None = None, num_classes: int = 594):
+    model = models.resnet18(weights='DEFAULT')
+    return handle_resnet_model(model, weights, save_to, num_classes)
+
+
+def get_resnet34(weights: str | None = None, save_to: str | None = None, num_classes: int = 594):
+    model = models.resnet34(weights='DEFAULT')
+    return handle_resnet_model(model, weights, save_to, num_classes)
+
+
+def get_resnet101(weights: str | None = None, save_to: str | None = None, num_classes: int = 594):
+    model = models.resnet101(weights='DEFAULT')
+    return handle_resnet_model(model, weights, save_to, num_classes)
+
+
+def get_resnet152(weights: str | None = None, save_to: str | None = None, num_classes: int = 594):
+    model = models.resnet152(weights='DEFAULT')
+    return handle_resnet_model(model, weights, save_to, num_classes)
