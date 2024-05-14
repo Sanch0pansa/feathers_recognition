@@ -80,8 +80,6 @@ class FeathersImageDataModule(L.LightningDataModule):
                                                        self.train_data_dir,
                                                        transform=self.train_transform)
 
-
-
             self.feathers_val = FeathersImageDataset(self.test_data_file,
                                                      self.test_data_dir,
                                                      transform=self.test_transform)
@@ -128,9 +126,9 @@ class FeathersImageDataModule(L.LightningDataModule):
 if __name__ == "__main__":
     dm = FeathersImageDataModule(
         "../dataset/images",
-        "../dataset/data/train_all_species.csv",
+        "../dataset/data/train_top_100_species.csv",
         "../dataset/images",
-        "../dataset/data/test_all_species.csv",
+        "../dataset/data/test_top_100_species.csv",
 
         use_sampler=True)
     dm.setup("fit")
