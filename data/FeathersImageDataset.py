@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import transforms
 from matplotlib import pyplot as plt
+from json import dumps
 import cv2
 
 
@@ -13,10 +14,11 @@ class FeathersImageDataset(Dataset):
                  img_dir, 
                  transform=None, 
                  target_transform=None,
+                 sort_indices=True,
                  ):
         self.data = pd.read_csv(annotations_file)
-        self.classes_codes, self.classes_uniques = pd.factorize(self.data['species'], sort=True)
-        self.data['species'] = pd.factorize(self.data['species'], sort=True)[0]
+        self.classes_codes, self.classes_uniques = pd.factorize(self.data['species'], sort=sort_indices)
+        self.data['species'] = pd.factorize(self.data['species'], sort=sort_indices)[0]
 
         self.imgs = pd.DataFrame(columns=('filename', 'species'))
         for idx, row in self.data.iterrows():
@@ -71,6 +73,13 @@ class FeathersImageDataset(Dataset):
             data[name] = i
         return data
 
+    @property
+    def idx_to_class(self):
+        data = [""] * len(self.classes_uniques)
+        for (i, name) in enumerate(self.classes_uniques):
+            data[int(i)] = name
+        return data
+
 
 if __name__ == "__main__":
     
@@ -85,8 +94,12 @@ if __name__ == "__main__":
     
     dataset = FeathersImageDataset("../dataset/data/feathers_data.csv",
                                    "../dataset/images",
-                                   transform=transform_a)
-    data_loader = DataLoader(dataset, batch_size=4, shuffle=True)
-    
-    print(dataset.classes)
-    print(dataset.class_to_idx)
+                                   transform=transform_a, sort_indices=False)
+    with open("idx-to-class_all.json", "w") as f:
+        f.write(dumps(dataset.idx_to_class, indent="\t"))
+
+    dataset = FeathersImageDataset("../dataset/data/train_top_100_species.csv",
+                                   "../dataset/images",
+                                   transform=transform_a, sort_indices=True)
+    with open("idx-to-class_top100.json", "w") as f:
+        f.write(dumps(dataset.idx_to_class, indent="\t"))
