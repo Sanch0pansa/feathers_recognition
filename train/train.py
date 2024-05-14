@@ -19,42 +19,42 @@ EPOCHS = 5
 postfix = "_weighted"
 
 models = [
-    {
-        'name': 'densenet121',
-        'cls': Dense121Model,
-    },
-    {
-        'name': 'densenet161',
-        'cls': Dense161Model,
-    },
-    {
-        'name': 'densenet169',
-        'cls': Dense169Model,
-    },
+    # {
+    #     'name': 'densenet121',
+    #     'cls': Dense121Model,
+    # },
+    # {
+    #     'name': 'densenet161',
+    #     'cls': Dense161Model,
+    # },
+    # {
+    #     'name': 'densenet169',
+    #     'cls': Dense169Model,
+    # },
     {
         'name': 'densenet201',
         'cls': Dense201Model,
     },
-    {
-        'name': 'resnet50',
-        'cls': Resnet50Model,
-    },
-    {
-        'name': 'resnet18',
-        'cls': Resnet18Model,
-    },
-    {
-        'name': 'resnet34',
-        'cls': Resnet34Model,
-    },
-    {
-        'name': 'resnet101',
-        'cls': Resnet101Model,
-    },
-    {
-        'name': 'resnet152',
-        'cls': Resnet152Model,
-    },
+    # {
+    #     'name': 'resnet50',
+    #     'cls': Resnet50Model,
+    # },
+    # {
+    #     'name': 'resnet18',
+    #     'cls': Resnet18Model,
+    # },
+    # {
+    #     'name': 'resnet34',
+    #     'cls': Resnet34Model,
+    # },
+    # {
+    #     'name': 'resnet101',
+    #     'cls': Resnet101Model,
+    # },
+    # {
+    #     'name': 'resnet152',
+    #     'cls': Resnet152Model,
+    # },
 ]
 
 for model_data in models:
@@ -65,16 +65,18 @@ for model_data in models:
         config={
             "learning_rate": 0.001,
             "architecture": model_data['name'],
-            "dataset": "FeathersV1",
+            "dataset": "FeathersV1-top100",
             "epochs": EPOCHS,
         }
     )
 
     dm = FeathersImageDataModule(
         "../dataset/images",
-        "../dataset/data/feathers_data.csv",
-        use_sampler=True
-    )
+        "../dataset/data/train_top_100_species.csv",
+        "../dataset/images",
+        "../dataset/data/test_top_100_species.csv",
+
+        use_sampler=True)
     model = model_data['cls'](
         num_classes=dm.num_classes(),
         model_config={
