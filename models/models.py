@@ -11,7 +11,10 @@ def handle_densenet_model(model: nn.Module, weights: str, save_to: str | None = 
     model.classifier = get_classifier(in_features=model.classifier.in_features, num_classes=num_classes)
 
     if weights:
-        model.load_state_dict(torch.load(weights))
+        state_dict = torch.load(weights)
+        remove_prefix = 'model.'
+        state_dict = {k[len(remove_prefix):] if k.startswith(remove_prefix) else k: v for k, v in state_dict.items()}
+        model.load_state_dict(state_dict)
 
     if save_to is not None:
         torch.save(model.state_dict(), save_to)
@@ -23,7 +26,10 @@ def handle_resnet_model(model: nn.Module, weights: str, save_to: str | None = No
     model.fc = get_classifier(in_features=model.fc.in_features, num_classes=num_classes)
 
     if weights:
-        model.load_state_dict(torch.load(weights))
+        state_dict = torch.load(weights)
+        remove_prefix = 'model.'
+        state_dict = {k[len(remove_prefix):] if k.startswith(remove_prefix) else k: v for k, v in state_dict.items()}
+        model.load_state_dict(state_dict)
 
     if save_to is not None:
         torch.save(model.state_dict(), save_to)
